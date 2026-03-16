@@ -106,6 +106,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .tag.zelle{background:#d4e8ff;color:#1a5fa8}
 .tag.venta{background:#ffe0eb;color:#b5004f}
 .tag.inversion{background:#ffeedd;color:#a05000}
+.tag.fresas{background:#ffe0eb;color:#b5004f}
+.tag.sancocho{background:#fff3e0;color:#e65100}
+.tag.inver{background:#ffeedd;color:#a05000}
 .hc-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:7px}
 .hc-field{display:flex;flex-direction:column;gap:2px}
 .hc-field label{font-size:10px;color:#c2527a;font-weight:700;text-transform:uppercase}
@@ -217,6 +220,13 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <div class="sec-title">Por método de pago</div>
     <div class="mrow ef"><span class="ml">💵 Efectivo</span><span class="mv" id="r-ef">$0.00</span></div>
     <div class="mrow ze"><span class="ml">🏦 Zelle</span><span class="mv" id="r-ze">$0.00</span></div>
+    <div style="margin-top:14px">
+      <div class="sec-title">Respaldo de datos</div>
+      <button onclick="exportData()" style="width:100%;background:linear-gradient(135deg,#a29bfe,#6c5ce7);color:#fff;border:none;border-radius:12px;padding:13px;font-family:Nunito,sans-serif;font-weight:800;font-size:14px;margin-bottom:8px">📤 Exportar respaldo</button>
+      <button onclick="document.getElementById('import-file').click()" style="width:100%;background:#fff;color:#b5004f;border:1.5px solid #ffc2d4;border-radius:12px;padding:13px;font-family:Nunito,sans-serif;font-weight:800;font-size:14px">📥 Importar respaldo</button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+      <p style="font-size:11px;color:#aaa;text-align:center;margin-top:8px">Los datos se guardan automáticamente en este dispositivo</p>
+    </div>
   </div>
 
   <!-- HISTORIAL -->
@@ -292,7 +302,8 @@ function addVenta(){
   let total=unit*qty+del+pro;
   let desc=document.getElementById('v-desc').value||names[curProd];
   let todayISO=document.getElementById('v-fecha').value||new Date().toISOString().split('T')[0];
-  records.unshift({id:Date.now(),tipo:'Venta',fechaISO:todayISO,fecha:new Date(todayISO+'T12:00:00').toLocaleDateString('es'),desc,qty,unit,delivery:del,propina:pro,total,pago:vPay});
+  let producto=names[curProd];
+  records.unshift({id:Date.now(),tipo:'Venta',fechaISO:todayISO,fecha:new Date(todayISO+'T12:00:00').toLocaleDateString('es'),desc,producto,qty,unit,delivery:del,propina:pro,total,pago:vPay});
   document.getElementById('del').value=0;
   document.getElementById('prop').value=0;
   document.getElementById('tops').value=0;
@@ -361,7 +372,7 @@ function renderHist(){
         </div>
       </div>
       <div class="hc-row">
-        <span class="tag ${r.tipo==='Venta'?'venta':'inversion'}">${r.tipo}</span>
+        ${r.producto?`<span class="tag ${r.producto.includes('Fresas')?'fresas':'sancocho'}">${r.producto.includes('Fresas')?'🍓 Fresas':'🍲 '+r.producto}</span>`:'<span class="tag inver">'+r.tipo+'</span>'}
         <span class="tag ${r.pago.toLowerCase()}">${r.pago}</span>
       </div>
       <div class="hc-fields">
@@ -418,6 +429,58 @@ function toast(msg){
   document.body.appendChild(d);setTimeout(()=>d.remove(),2000);
 }
 
+function saveData(){
+  try{localStorage.setItem('fresita_records',JSON.stringify(records));}catch(e){}
+}
+
+function loadData(){
+  try{
+    let d=localStorage.getItem('fresita_records');
+    if(d) records=JSON.parse(d);
+  }catch(e){records=[];}
+}
+
+function exportData(){
+  let json=JSON.stringify(records,null,2);
+  let blob=new Blob([json],{type:'application/json'});
+  let url=URL.createObjectURL(blob);
+  let a=document.createElement('a');
+  a.href=url;
+  let fecha=new Date().toLocaleDateString('es').replace(/\//g,'-');
+  a.download='fresita_respaldo_'+fecha+'.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Respaldo exportado');
+}
+
+function importData(e){
+  let file=e.target.files[0];
+  if(!file) return;
+  let reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      let data=JSON.parse(ev.target.result);
+      if(Array.isArray(data)){
+        records=data;
+        saveData();
+        update();
+        renderHist();
+        toast('Datos importados: '+data.length+' registros');
+        showTab('historial');
+      } else {
+        toast('Archivo inválido');
+      }
+    }catch(err){toast('Error al importar');}
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+// Wrap update to also save
+const _origUpdate=update;
+update=function(){_origUpdate();saveData();}
+
+loadData();
 update();
 let _today=new Date().toISOString().split('T')[0];
 document.getElementById('v-fecha').value=_today;
