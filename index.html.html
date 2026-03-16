@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>La Fresita – Balance</title>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Nunito',sans-serif;background:#fff0f5;height:100dvh;overflow:hidden;display:flex;flex-direction:column}
+
+/* TOP BAR */
+.top-bar{background:linear-gradient(135deg,#ff6b9d,#ff8fab);padding:10px 12px 8px;flex-shrink:0}
+.top-bar h1{font-family:'Pacifico',cursive;font-size:18px;color:#fff;text-align:center;margin-bottom:7px}
+.kpis{display:flex;gap:4px}
+.kpi{background:rgba(255,255,255,.25);border-radius:7px;padding:3px 0;text-align:center;flex:1}
+.kpi .lbl{font-size:8px;color:#ffe0eb;font-weight:700;text-transform:uppercase;display:block}
+.kpi .val{font-size:12px;font-weight:800;color:#fff;display:block}
+.kpi.gr .val{color:#b2ffd4}
+.kpi.bl .val{color:#b2d8ff}
+.kpi.pu .val{color:#f0c0ff}
+
+/* TAB BAR */
+.tab-bar{display:flex;background:#fff;border-bottom:1.5px solid #ffd6e7;flex-shrink:0}
+.tab{flex:1;padding:9px 4px 8px;text-align:center;font-size:10px;font-weight:700;color:#c2527a;border:none;background:none;cursor:pointer;border-bottom:2.5px solid transparent;font-family:'Nunito',sans-serif}
+.tab.active{color:#ff6b9d;border-bottom-color:#ff6b9d}
+.tab .icon{font-size:16px;display:block;margin-bottom:1px}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px;-webkit-overflow-scrolling:touch}
+.screen{display:none}
+.screen.active{display:block}
+
+/* SECTION */
+.sec-title{font-size:11px;font-weight:800;color:#c2527a;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+
+/* PRODUCT BUTTONS */
+.btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.prod-btn{background:linear-gradient(135deg,#ff6b9d,#ff8fab);color:#fff;border:none;border-radius:10px;padding:10px 6px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;text-align:center;line-height:1.3;min-height:56px}
+.prod-btn.sel{box-shadow:0 0 0 3px #b5004f}
+.prod-btn.orange{background:linear-gradient(135deg,#ff9f43,#ffbe76)}
+.prod-btn .price{font-size:16px;font-weight:800;display:block;margin-top:2px}
+
+/* ROWS */
+.row{display:flex;align-items:center;gap:8px;background:#fff0f5;border-radius:9px;padding:8px 10px;margin-bottom:6px}
+.row label{flex:1;font-size:13px;color:#b5004f;font-weight:700}
+.row input[type=number]{width:58px;border:1.5px solid #ffc2d4;border-radius:8px;padding:5px 6px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;text-align:center;-webkit-appearance:none}
+.row .sub{font-weight:800;color:#b5004f;min-width:48px;text-align:right;font-size:13px}
+
+/* QTY */
+.qty-ctrl{display:flex;align-items:center;gap:6px}
+.qty-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid #ffc2d4;background:#fff;color:#b5004f;font-size:18px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1}
+.qty-num{width:28px;text-align:center;font-size:15px;font-weight:800;color:#b5004f}
+
+/* INPUTS */
+input[type=text],input[type=date],input[type=number].full,select{width:100%;border:1.5px solid #ffc2d4;border-radius:9px;padding:9px 10px;font-family:'Nunito',sans-serif;font-size:14px;margin-bottom:6px;background:#fff;color:#333;-webkit-appearance:none;appearance:none}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23ff6b9d' stroke-width='2' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+
+/* PAY */
+.pay-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.pay-btn{border:1.5px solid #ffc2d4;background:#fff;border-radius:9px;padding:9px;cursor:pointer;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;color:#b5004f}
+.pay-btn.active{background:#ff6b9d;color:#fff;border-color:#ff6b9d}
+
+/* TOTAL */
+.amt{background:#fff0f5;border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.amt .al{font-size:13px;color:#c2527a;font-weight:700}
+.amt .av{font-size:22px;font-weight:800;color:#b5004f}
+
+/* BUTTONS */
+.reg-btn{width:100%;background:linear-gradient(135deg,#ff6b9d,#c2527a);color:#fff;border:none;border-radius:12px;padding:14px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;margin-bottom:4px}
+.inv-btn{width:100%;background:linear-gradient(135deg,#ff9f43,#e67e22);color:#fff;border:none;border-radius:12px;padding:14px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;margin-top:4px}
+
+/* RESUMEN */
+.sep{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.sep-box{border-radius:12px;padding:12px;text-align:center}
+.sep-box.inv{background:#fff0e6;border:1.5px solid #ffb347}
+.sep-box.gan{background:#e6fff2;border:1.5px solid #55efc4}
+.sep-box .sl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px}
+.sep-box.inv .sl{color:#b86a00}
+.sep-box.gan .sl{color:#007a3a}
+.sep-box .sv{font-size:22px;font-weight:800;display:block}
+.sep-box.inv .sv{color:#c27000}
+.sep-box.gan .sv{color:#00a050}
+.mrow{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:10px;margin-bottom:6px}
+.mrow.ef{background:#e6fff2}
+.mrow.ze{background:#e8f0ff}
+.mrow .ml{font-size:13px;font-weight:700}
+.mrow.ef .ml{color:#1a7a3a}
+.mrow.ze .ml{color:#1a5fa8}
+.mrow .mv{font-size:18px;font-weight:800}
+.mrow.ef .mv{color:#007a3a}
+.mrow.ze .mv{color:#1a5fa8}
+
+/* HISTORIAL */
+.hist-list{display:flex;flex-direction:column;gap:8px}
+.hist-card{background:#fff;border-radius:12px;border:1.5px solid #ffd6e7;padding:10px 12px}
+.hc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.hc-desc{font-size:13px;font-weight:700;color:#333;flex:1}
+.hc-total{font-size:15px;font-weight:800}
+.hc-tienda{font-size:11px;color:#aaa;margin-top:1px}
+.hc-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700}
+.tag.efectivo{background:#d4f7e7;color:#1a7a3a}
+.tag.zelle{background:#d4e8ff;color:#1a5fa8}
+.tag.venta{background:#ffe0eb;color:#b5004f}
+.tag.inversion{background:#ffeedd;color:#a05000}
+.hc-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:7px}
+.hc-field{display:flex;flex-direction:column;gap:2px}
+.hc-field label{font-size:10px;color:#c2527a;font-weight:700;text-transform:uppercase}
+.hc-field input[type=number]{width:100%;border:1.5px solid #ffc2d4;border-radius:7px;padding:4px 6px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;color:#b5004f;background:#fff0f5;text-align:center;margin:0}
+.hc-field input[type=date]{width:100%;border:1.5px solid #ffc2d4;border-radius:7px;padding:4px 5px;font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;color:#b5004f;background:#fff0f5;margin:0;-webkit-appearance:none}
+.qty-cell{display:flex;align-items:center;gap:4px;justify-content:center}
+.qc-btn{width:24px;height:24px;border-radius:50%;border:1.5px solid #ffc2d4;background:#fff;color:#b5004f;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;flex-shrink:0}
+.del-btn{background:none;border:none;cursor:pointer;font-size:14px;color:#ff6b9d;padding:4px 6px;margin-left:auto}
+.empty-msg{text-align:center;color:#ccc;padding:30px 0;font-size:13px}
+
+/* CARD SEPARATOR */
+.card{background:#fff;border-radius:12px;border:1.5px solid #ffd6e7;padding:12px;margin-bottom:10px}
+
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#ff6b9d;color:#fff;padding:9px 20px;border-radius:20px;font-family:Nunito,sans-serif;font-weight:700;font-size:13px;z-index:999;pointer-events:none;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>🍓 La Fresita</h1>
+  <div class="kpis">
+    <div class="kpi"><span class="lbl">Ingresos</span><span class="val" id="k-ing">$0</span></div>
+    <div class="kpi"><span class="lbl">Invertido</span><span class="val" id="k-inv">$0</span></div>
+    <div class="kpi gr"><span class="lbl">Ganancia</span><span class="val" id="k-gan">$0</span></div>
+    <div class="kpi pu"><span class="lbl">Efectivo</span><span class="val" id="k-ef">$0</span></div>
+    <div class="kpi bl"><span class="lbl">Zelle</span><span class="val" id="k-ze">$0</span></div>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab active" onclick="showTab('venta')"><span class="icon">🍓</span>Venta</button>
+  <button class="tab" onclick="showTab('inversion')"><span class="icon">📦</span>Inversión</button>
+  <button class="tab" onclick="showTab('resumen')"><span class="icon">📊</span>Resumen</button>
+  <button class="tab" onclick="showTab('historial')"><span class="icon">📋</span>Historial</button>
+</div>
+
+<div class="content">
+
+  <!-- VENTA -->
+  <div class="screen active" id="s-venta">
+    <div class="sec-title">Selecciona producto</div>
+    <div class="btn-grid">
+      <button class="prod-btn" id="pb-fresas" onclick="selProd('fresas')">Fresas con Crema<span class="price">$12</span></button>
+      <button class="prod-btn orange" id="pb-san20" onclick="selProd('san20')">Sancocho Grande<span class="price">$20</span></button>
+      <button class="prod-btn orange" id="pb-san15" onclick="selProd('san15')">Sancocho Med.<span class="price">$15</span></button>
+      <button class="prod-btn orange" id="pb-san10" onclick="selProd('san10')">Sancocho Peq.<span class="price">$10</span></button>
+    </div>
+    <div class="row">
+      <label>Cantidad</label>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="chgQty(-1)">−</button>
+        <span class="qty-num" id="qty-num">1</span>
+        <button class="qty-btn" onclick="chgQty(1)">+</button>
+      </div>
+      <span class="sub" id="qty-sub">$0</span>
+    </div>
+    <div class="row" id="top-row" style="display:none">
+      <label>Toppings (+$1 c/u)</label>
+      <input type="number" id="tops" value="0" min="0" oninput="recalc()">
+      <span class="sub" id="tops-s">$0</span>
+    </div>
+    <div class="row">
+      <label>Delivery</label>
+      <input type="number" id="del" value="0" min="0" oninput="recalc()">
+      <span class="sub" id="del-s">$0</span>
+    </div>
+    <div class="row">
+      <label>Propina</label>
+      <input type="number" id="prop" value="0" min="0" oninput="recalc()">
+      <span class="sub" id="prop-s">$0</span>
+    </div>
+    <input type="text" id="v-desc" placeholder="Descripción (opcional)">
+    <input type="date" id="v-fecha">
+    <div class="pay-row">
+      <button class="pay-btn active" id="v-ef" onclick="setVPay('Efectivo')">💵 Efectivo</button>
+      <button class="pay-btn" id="v-ze" onclick="setVPay('Zelle')">🏦 Zelle</button>
+    </div>
+    <div class="amt">
+      <span class="al">Total:</span>
+      <span class="av" id="total-prev">$0.00</span>
+    </div>
+    <button class="reg-btn" onclick="addVenta()">+ Registrar Venta</button>
+  </div>
+
+  <!-- INVERSIÓN -->
+  <div class="screen" id="s-inversion">
+    <div class="sec-title">Nueva inversión / gasto</div>
+    <input type="text" id="i-desc" placeholder="Qué compraste">
+    <input type="number" class="full" id="i-monto" placeholder="Monto ($)" min="0" step="0.01">
+    <input type="text" id="i-tienda" placeholder="Dónde se compró">
+    <input type="date" id="i-fecha">
+    <select id="i-cat">
+      <option>Ingredientes</option><option>Empaque</option><option>Equipo</option><option>Servicios</option><option>Otro</option>
+    </select>
+    <div class="pay-row">
+      <button class="pay-btn active" id="i-ef" onclick="setIPay('Efectivo')">💵 Efectivo</button>
+      <button class="pay-btn" id="i-ze" onclick="setIPay('Zelle')">🏦 Zelle</button>
+    </div>
+    <button class="inv-btn" onclick="addInv()">+ Registrar Inversión</button>
+  </div>
+
+  <!-- RESUMEN -->
+  <div class="screen" id="s-resumen">
+    <div class="sec-title">Inversión vs Ganancia</div>
+    <div class="sep">
+      <div class="sep-box inv"><span class="sl">Invertido</span><span class="sv" id="r-inv">$0</span></div>
+      <div class="sep-box gan"><span class="sl">Ganancia</span><span class="sv" id="r-gan">$0</span></div>
+    </div>
+    <div class="sec-title">Por método de pago</div>
+    <div class="mrow ef"><span class="ml">💵 Efectivo</span><span class="mv" id="r-ef">$0.00</span></div>
+    <div class="mrow ze"><span class="ml">🏦 Zelle</span><span class="mv" id="r-ze">$0.00</span></div>
+  </div>
+
+  <!-- HISTORIAL -->
+  <div class="screen" id="s-historial">
+    <div class="sec-title">Transacciones</div>
+    <div class="hist-list" id="hist"></div>
+  </div>
+
+</div>
+
+<script>
+let records=[];
+let curProd=null;
+let qty=1;
+let vPay='Efectivo';
+let iPay='Efectivo';
+const prices={fresas:12,san20:20,san15:15,san10:10};
+const names={fresas:'Fresas con Crema',san20:'Sancocho Grande',san15:'Sancocho Med.',san10:'Sancocho Peq.'};
+
+function showTab(t){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('s-'+t).classList.add('active');
+  document.querySelectorAll('.tab')[['venta','inversion','resumen','historial'].indexOf(t)].classList.add('active');
+  if(t==='historial') renderHist();
+}
+
+function selProd(p){
+  curProd=p;
+  ['fresas','san20','san15','san10'].forEach(x=>document.getElementById('pb-'+x).classList.toggle('sel',x===p));
+  document.getElementById('top-row').style.display=p==='fresas'?'flex':'none';
+  if(p!=='fresas') document.getElementById('tops').value=0;
+  recalc();
+}
+
+function chgQty(d){
+  qty=Math.max(1,qty+d);
+  document.getElementById('qty-num').textContent=qty;
+  recalc();
+}
+
+function recalc(){
+  let base=curProd?prices[curProd]:0;
+  let tops=curProd==='fresas'?+document.getElementById('tops').value||0:0;
+  let del=+document.getElementById('del').value||0;
+  let pro=+document.getElementById('prop').value||0;
+  let unit=base+tops;
+  document.getElementById('qty-sub').textContent='$'+(unit*qty).toFixed(2);
+  document.getElementById('tops-s').textContent='$'+tops;
+  document.getElementById('del-s').textContent='$'+del;
+  document.getElementById('prop-s').textContent='$'+pro;
+  document.getElementById('total-prev').textContent='$'+(unit*qty+del+pro).toFixed(2);
+}
+
+function setVPay(m){
+  vPay=m;
+  document.getElementById('v-ef').classList.toggle('active',m==='Efectivo');
+  document.getElementById('v-ze').classList.toggle('active',m==='Zelle');
+}
+function setIPay(m){
+  iPay=m;
+  document.getElementById('i-ef').classList.toggle('active',m==='Efectivo');
+  document.getElementById('i-ze').classList.toggle('active',m==='Zelle');
+}
+
+function addVenta(){
+  if(!curProd){toast('Selecciona un producto');return;}
+  let base=prices[curProd];
+  let tops=curProd==='fresas'?+document.getElementById('tops').value||0:0;
+  let del=+document.getElementById('del').value||0;
+  let pro=+document.getElementById('prop').value||0;
+  let unit=base+tops;
+  let total=unit*qty+del+pro;
+  let desc=document.getElementById('v-desc').value||names[curProd];
+  let todayISO=document.getElementById('v-fecha').value||new Date().toISOString().split('T')[0];
+  records.unshift({id:Date.now(),tipo:'Venta',fechaISO:todayISO,fecha:new Date(todayISO+'T12:00:00').toLocaleDateString('es'),desc,qty,unit,delivery:del,propina:pro,total,pago:vPay});
+  document.getElementById('del').value=0;
+  document.getElementById('prop').value=0;
+  document.getElementById('tops').value=0;
+  document.getElementById('v-desc').value='';
+  document.getElementById('v-fecha').value=new Date().toISOString().split('T')[0];
+  qty=1;document.getElementById('qty-num').textContent=1;
+  curProd=null;
+  ['fresas','san20','san15','san10'].forEach(x=>document.getElementById('pb-'+x).classList.remove('sel'));
+  document.getElementById('top-row').style.display='none';
+  recalc();update();toast('Venta: $'+total.toFixed(2));
+}
+
+function addInv(){
+  let desc=document.getElementById('i-desc').value;
+  let monto=parseFloat(document.getElementById('i-monto').value);
+  if(!desc||!monto){toast('Completa descripción y monto');return;}
+  let tienda=document.getElementById('i-tienda').value;
+  let todayISO2=document.getElementById('i-fecha').value||new Date().toISOString().split('T')[0];
+  records.unshift({id:Date.now(),tipo:'Inversion',fechaISO:todayISO2,fecha:new Date(todayISO2+'T12:00:00').toLocaleDateString('es'),desc,tienda,qty:1,unit:monto,delivery:0,propina:0,total:monto,pago:iPay});
+  document.getElementById('i-desc').value='';
+  document.getElementById('i-monto').value='';
+  document.getElementById('i-tienda').value='';
+  document.getElementById('i-fecha').value=new Date().toISOString().split('T')[0];
+  update();toast('Inversión: $'+monto.toFixed(2));
+}
+
+function changeField(id,field,delta){
+  let r=records.find(x=>x.id===id);
+  if(!r) return;
+  if(field==='qty') r.qty=Math.max(1,(r.qty||1)+delta);
+  r.total=r.unit*(r.qty||1)+(r.delivery||0)+(r.propina||0);
+  update();renderHist();
+}
+
+function editField(id,field,val){
+  let r=records.find(x=>x.id===id);
+  if(!r) return;
+  r[field]=parseFloat(val)||0;
+  r.total=r.unit*(r.qty||1)+(r.delivery||0)+(r.propina||0);
+  update();
+}
+
+function editFecha(id,val){
+  let r=records.find(x=>x.id===id);
+  if(!r||!val) return;
+  r.fechaISO=val;
+  r.fecha=new Date(val+'T12:00:00').toLocaleDateString('es');
+  update();
+}
+
+function delRec(id){records=records.filter(r=>r.id!==id);update();renderHist();}
+
+function renderHist(){
+  let el=document.getElementById('hist');
+  if(!records.length){el.innerHTML='<div class="empty-msg">Sin registros aún 🍓</div>';return;}
+  el.innerHTML=records.map(r=>`
+    <div class="hist-card">
+      <div class="hc-top">
+        <div>
+          <div class="hc-desc">${r.desc}</div>
+          ${r.tienda?`<div class="hc-tienda">${r.tienda}</div>`:''}
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="hc-total" style="color:${r.tipo==='Venta'?'#1a7a3a':'#c27000'}">$${r.total.toFixed(2)}</span>
+          <button class="del-btn" onclick="delRec(${r.id})">✕</button>
+        </div>
+      </div>
+      <div class="hc-row">
+        <span class="tag ${r.tipo==='Venta'?'venta':'inversion'}">${r.tipo}</span>
+        <span class="tag ${r.pago.toLowerCase()}">${r.pago}</span>
+      </div>
+      <div class="hc-fields">
+        <div class="hc-field">
+          <label>Fecha</label>
+          <input type="date" value="${r.fechaISO||''}" onchange="editFecha(${r.id},this.value)">
+        </div>
+        ${r.tipo==='Venta'?`
+        <div class="hc-field">
+          <label>Cantidad</label>
+          <div class="qty-cell">
+            <button class="qc-btn" onclick="changeField(${r.id},'qty',-1)">−</button>
+            <span style="font-weight:800;color:#b5004f;font-size:14px">${r.qty||1}</span>
+            <button class="qc-btn" onclick="changeField(${r.id},'qty',1)">+</button>
+          </div>
+        </div>
+        <div class="hc-field">
+          <label>Delivery</label>
+          <input type="number" value="${r.delivery||0}" min="0" onchange="editField(${r.id},'delivery',this.value)">
+        </div>
+        `:`<div class="hc-field"></div><div class="hc-field"></div>`}
+      </div>
+      ${r.tipo==='Venta'?`
+      <div class="hc-fields" style="grid-template-columns:1fr 1fr;margin-top:5px">
+        <div class="hc-field">
+          <label>Propina</label>
+          <input type="number" value="${r.propina||0}" min="0" onchange="editField(${r.id},'propina',this.value)">
+        </div>
+      </div>`:''}
+    </div>`).join('');
+}
+
+function update(){
+  let v=records.filter(r=>r.tipo==='Venta');
+  let inv=records.filter(r=>r.tipo==='Inversion');
+  let tV=v.reduce((s,r)=>s+r.total,0);
+  let tI=inv.reduce((s,r)=>s+r.total,0);
+  let ef=v.filter(r=>r.pago==='Efectivo').reduce((s,r)=>s+r.total,0);
+  let ze=v.filter(r=>r.pago==='Zelle').reduce((s,r)=>s+r.total,0);
+  let gan=tV-tI;
+  document.getElementById('k-ing').textContent='$'+tV.toFixed(0);
+  document.getElementById('k-inv').textContent='$'+tI.toFixed(0);
+  document.getElementById('k-gan').textContent='$'+gan.toFixed(0);
+  document.getElementById('k-ef').textContent='$'+ef.toFixed(0);
+  document.getElementById('k-ze').textContent='$'+ze.toFixed(0);
+  document.getElementById('r-inv').textContent='$'+tI.toFixed(0);
+  document.getElementById('r-gan').textContent='$'+gan.toFixed(0);
+  document.getElementById('r-ef').textContent='$'+ef.toFixed(2);
+  document.getElementById('r-ze').textContent='$'+ze.toFixed(2);
+}
+
+function toast(msg){
+  let d=document.createElement('div');d.className='toast';d.textContent=msg;
+  document.body.appendChild(d);setTimeout(()=>d.remove(),2000);
+}
+
+update();
+let _today=new Date().toISOString().split('T')[0];
+document.getElementById('v-fecha').value=_today;
+document.getElementById('i-fecha').value=_today;
+</script>
+</body>
+</html>
