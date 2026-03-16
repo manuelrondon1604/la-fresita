@@ -215,9 +215,13 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <div class="sec-title">Inversión vs Ganancia</div>
     <div class="sep">
       <div class="sep-box inv"><span class="sl">Invertido</span><span class="sv" id="r-inv">$0</span></div>
-      <div class="sep-box gan"><span class="sl">Ganancia</span><span class="sv" id="r-gan">$0</span></div>
+      <div class="sep-box gan"><span class="sl">Ganancia Neta</span><span class="sv" id="r-gan">$0</span></div>
     </div>
-    <div class="sec-title">Por método de pago</div>
+    <div class="sec-title">Desglose de ingresos</div>
+    <div class="mrow" style="background:#fff0f5"><span class="ml" style="color:#b5004f">🍓 Ventas (productos)</span><span class="mv" style="color:#b5004f" id="r-ventas">$0.00</span></div>
+    <div class="mrow" style="background:#e8f4ff"><span class="ml" style="color:#1a5fa8">🚗 Delivery</span><span class="mv" style="color:#1a5fa8" id="r-del">$0.00</span></div>
+    <div class="mrow" style="background:#f0fff0"><span class="ml" style="color:#1a7a3a">🎁 Propinas</span><span class="mv" style="color:#1a7a3a" id="r-prop">$0.00</span></div>
+    <div class="sec-title" style="margin-top:10px">Por método de pago</div>
     <div class="mrow ef"><span class="ml">💵 Efectivo</span><span class="mv" id="r-ef">$0.00</span></div>
     <div class="mrow ze"><span class="ml">🏦 Zelle</span><span class="mv" id="r-ze">$0.00</span></div>
     <div style="margin-top:14px">
@@ -418,8 +422,14 @@ function update(){
   document.getElementById('k-gan').textContent='$'+gan.toFixed(0);
   document.getElementById('k-ef').textContent='$'+ef.toFixed(0);
   document.getElementById('k-ze').textContent='$'+ze.toFixed(0);
+  let delTotal=v.reduce((s,r)=>s+(r.delivery||0),0);
+  let propTotal=v.reduce((s,r)=>s+(r.propina||0),0);
+  let ventasSolo=v.reduce((s,r)=>s+(r.unit*(r.qty||1)),0);
   document.getElementById('r-inv').textContent='$'+tI.toFixed(0);
   document.getElementById('r-gan').textContent='$'+gan.toFixed(0);
+  document.getElementById('r-ventas').textContent='$'+ventasSolo.toFixed(2);
+  document.getElementById('r-del').textContent='$'+delTotal.toFixed(2);
+  document.getElementById('r-prop').textContent='$'+propTotal.toFixed(2);
   document.getElementById('r-ef').textContent='$'+ef.toFixed(2);
   document.getElementById('r-ze').textContent='$'+ze.toFixed(2);
 }
